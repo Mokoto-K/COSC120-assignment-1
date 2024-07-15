@@ -39,6 +39,8 @@ public class Coffee {
         this.description = description;
     }
 
+    // TODO - Add a second constructor for users requested coffee
+
     // Getters for all our data fields
     /**
      * @return returns a coffee's ID
