@@ -1,6 +1,6 @@
 /**
- * @author Joshua Hahn
- * Email: jhahn@myune.edu.au
+ * @author Enter name
+ * Email: Enter email
  * COSC120 - Assignment 1
  * Date: 15/07/24
  */
