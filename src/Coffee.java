@@ -13,8 +13,8 @@ public class Coffee {
     private final float price;
     private final int shots;
     private final String sugar;
-    private final String milk;
-    private final String extras;
+    private final String[] milk;
+    private final String[] extras;
     private final String description;
 
     /**
@@ -28,7 +28,7 @@ public class Coffee {
      * @param extras - Any extras for the coffee
      * @param description - The coffee's description
      */
-    public Coffee(long id, String name, float price, int shots, String sugar, String milk, String extras, String description){
+    public Coffee(long id, String name, float price, int shots, String sugar, String[] milk, String[] extras, String description){
         this.id = id;
         this.name = name;
         this.price = price;
@@ -80,14 +80,14 @@ public class Coffee {
     /**
      * @return returns a coffee's Milk option
      */
-    public String getMilk() {
+    public String[] getMilk() {
         return milk;
     }
 
     /**
      * @return returns a coffee's Extras
      */
-    public String getExtras() {
+    public String[] getExtras() {
         return extras;
     }
 
