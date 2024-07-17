@@ -5,8 +5,7 @@
  * Date: 15/07/24
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Menu {
 
@@ -36,6 +35,25 @@ public class Menu {
         return coffeeResults;
     }
 
-    // TODO - Homeboy "Teases" that we should have another method if we arnt apes...
-    // TODO - Update: it will be a void method to get a set of extras to use for an enum or joptionpane
+    /**
+     * Creates a new Set and assigns all the coffee extras that can be ordered to it, this will be used
+     * for creating a sudo enum style drop down list for customer selection.
+     * @return allExtras a set of all extras from the database
+     */
+    public Set<String> allExtras(){
+        Set<String> allExtras = new HashSet<>();
+
+        // TODO - Can replace statement with a collections.addall... but might not be exatcly what i want.
+        // Nested for loop to first get all the coffee objects from our menu
+        // Then get all the extras from each coffee and assign them to our set
+        for (Coffee coffee : coffeeMenu) {
+            for (String extra :coffee.getExtras()) {
+                // Handles the blank case where a coffee has no extra
+                if (Objects.equals(extra, "")) { extra = "none";}
+                    // Adds extra to the set if it doesn't exist in it yet.
+                    allExtras.add(extra.trim());
+            }
+        }
+        return allExtras;
+    }
 }
