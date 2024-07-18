@@ -23,15 +23,32 @@ public class Menu {
     /**
      * Compares a user's coffee to a list of coffee in the data and adds each coffee
      * that matches the user's select to a new List, then returns that list.
-     * @param coffee - a coffee object comprised of the user's selected coffee options
+     * @param usersCoffee - a coffee object comprised of the user's selected coffee options
      * @return a list of coffees from the database that match the user's neeeds
      */
     // TODO - Come up with a better name
-    public List<Coffee> compareCoffee(Coffee coffee){
+    public List<Coffee> compareCoffee(Coffee usersCoffee){
         List<Coffee> coffeeResults = new ArrayList<>();
         // TODO - Everything... I think it's just a bunch of if statements linked one after another
         // TODO - Dont forget the null case.
-
+        for (Coffee coffee : coffeeMenu) {
+            // TODO - Perhaps change control structure from nested ifs
+            // Checks which coffees in the database the users milk choice matches with
+            if (coffee.getMilk().contains(usersCoffee.getMilk().getFirst())) {
+                if (coffee.getShots() == usersCoffee.getShots()) {
+                    if (coffee.isPriceInRange(usersCoffee)) {
+                        if (coffee.getSugar().equalsIgnoreCase(usersCoffee.getSugar())) {
+                            for (String extra : usersCoffee.getExtras()) {
+                                if (coffee.getExtras().contains(extra)) {
+                                    coffeeResults.add(coffee);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return coffeeResults;
     }
 
@@ -49,7 +66,7 @@ public class Menu {
         for (Coffee coffee : coffeeMenu) {
             for (String extra :coffee.getExtras()) {
                 // Handles the blank case where a coffee has no extra
-                if (Objects.equals(extra, "")) { extra = "none";}
+                if (extra.equalsIgnoreCase("No extras")) { extra = "Skip";}
                     // Adds extra to the set if it doesn't exist in it yet.
                     allExtras.add(extra.trim());
             }

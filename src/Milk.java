@@ -4,7 +4,7 @@ public enum Milk {
 
     public String toString() {
         return switch (this) {
-            case FULLCREAM -> "Full-Cream";
+            case FULLCREAM -> "Full-cream";
             case SOY -> "Soy";
             case SKIM -> "Skim";
             case ALMOND -> "Almond";

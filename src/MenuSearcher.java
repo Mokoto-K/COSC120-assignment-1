@@ -28,9 +28,13 @@ public class MenuSearcher {
     public static void main(String[] args) {
         ImageIcon icon = new ImageIcon(appIcon);
         menu = loadMenu();
-        System.out.println(menu.allExtras());
 
-        userCoffee();
+        for (Coffee c : menu.compareCoffee(userCoffee())) {
+//        List<Coffee> c = menu.compareCoffee(userCoffee());
+            System.out.println(c.getName());
+        }
+
+
     }
 
     // TODO - This is pretty poorly wirtten
@@ -67,8 +71,26 @@ public class MenuSearcher {
                 float price = Float.parseFloat(coffeeDetails[2]);
                 int shots = Integer.parseInt(coffeeDetails[3]);
                 String sugar = coffeeDetails[4];
-                List<String> milk = List.of(splitOne[1].replace("],", "").split(","));
-                List<String> extras = List.of(splitOne[2].replace("],", "").split(","));
+
+                // TODO - Explain why this is happening and extras below it
+                List<String> tempMilk = List.of(splitOne[1].replace("],", "").split(","));
+                List<String> milk = new ArrayList<>();
+                for (String milkElement : tempMilk) {
+                    if (milkElement.isEmpty()) {
+                        milkElement = "None";
+                    }
+                    milk.add(milkElement.trim());
+                }
+                // TODO above todo
+                List<String> tempExtras = List.of(splitOne[2].replace("],", "").split(","));
+                List<String> extras = new ArrayList<>();
+                for (String extraElement : tempExtras) {
+                    if (extraElement.isEmpty()) {
+                        extraElement = "No Extras";
+                    }
+                    extras.add(extraElement.trim());
+                }
+
                 String description = splitOne[3];
 
                 // Sending all our variables to our coffee class to create a coffee object
@@ -128,9 +150,10 @@ public class MenuSearcher {
         int sugarChoice = JOptionPane.showConfirmDialog(null, "Would you like sugar?", appName,
                 JOptionPane.YES_NO_OPTION);
         String sugar = "";
-        if (sugarChoice == JOptionPane.YES_OPTION) { sugar = "Yes";}
-        else {sugar = "No";}
+        if (sugarChoice == JOptionPane.YES_OPTION) { sugar = "yes";}
+        else {sugar = "no";}
 
+        // TODO - Re explain all of this as it got tehnical with the whole skip and add all situation
         // Initiating an int to be used for keeping track of extras
         List<String> extras = new ArrayList<>();
         int decision = 0;
@@ -139,8 +162,13 @@ public class MenuSearcher {
             // Prompt the user to select any extras they would like
             String extra = (String) JOptionPane.showInputDialog(null, "What type of milk are you looking for?",
                     appName, JOptionPane.QUESTION_MESSAGE, null, menu.allExtras().toArray(), "");
+
             extras.add(extra);
             // Using the fact that "no" == 1 and "yes" == 0 to control the while loop
+            if (extra.equalsIgnoreCase("Skip")) {
+                extras.addAll(menu.allExtras());
+                break;
+            }
             decision = JOptionPane.showConfirmDialog(null, "Would you like to add another extra",
                     appName, JOptionPane.YES_NO_OPTION);
         }
@@ -167,7 +195,7 @@ public class MenuSearcher {
         }
 
 //        while loop for highest price range
-        while (max < 0) {
+        while (max < min) {
             try {
                 max = Float.parseFloat(JOptionPane.showInputDialog(null, "Enter your highest price:",
                         appName, JOptionPane.QUESTION_MESSAGE));
@@ -182,7 +210,10 @@ public class MenuSearcher {
             }
         }
         // TODO - make sure i am allowed to do this.... cause this should be multiple constructpr  solution
-        return new Coffee(0, "", 0, shots, sugar, Collections.singletonList(milk.toString()), extras,"");
+        Coffee usersCoffee = new Coffee(0, "", 0, shots, sugar, Collections.singletonList(milk.toString()), extras,"");
+        usersCoffee.setMax(max);
+        usersCoffee.setMin(min);
+        return usersCoffee;
     }
 
     public String matchedCoffee(Coffee coffee) {

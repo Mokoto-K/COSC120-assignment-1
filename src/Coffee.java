@@ -155,4 +155,7 @@ public class Coffee {
     }
 
     // TODO - Add a price range function
+    public boolean isPriceInRange(Coffee usersCoffee) {
+        return usersCoffee.min <= this.price && usersCoffee.max >= this.price;
+    }
 }
