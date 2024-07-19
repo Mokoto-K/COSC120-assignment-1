@@ -10,14 +10,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MenuSearcher {
-
+    // TODO - Add milk to the end of all of the milk names... didnt know where to put this todo
+    // TODO - Price doesnt have following 0 when displaying results
+    // TODO - Handle if the file name already exists
     private static final String filePath = "./menu.txt";
     private static final String appName = "The Caffeinated Geek";
     private static final String appIcon = "./the_caffeinated_geek.png";
@@ -26,13 +26,27 @@ public class MenuSearcher {
      * The main method of our program
      */
     public static void main(String[] args) {
+        // Sets the icon for Joptionpans
         ImageIcon icon = new ImageIcon(appIcon);
+
+        // Is an objetc of the menu class which contains our database of coffees
         menu = loadMenu();
 
-        for (Coffee c : menu.compareCoffee(userCoffee())) {
-//        List<Coffee> c = menu.compareCoffee(userCoffee());
-            System.out.println(c.getName());
-        }
+        // TODO - is fix the statement below to accept this coffee instead of just calling the function
+        Coffee userCoffee = userCoffee();
+
+        // TODO - Handle the no match case
+        // Is a map of coffees that matched the users critera
+        Map<String, Coffee> matchedCoffees = menu.compareCoffee(userCoffee);
+
+        // Is a string of the name of the coffee of the users choice
+        String usersChoice = selectedCoffee(matchedCoffees);
+
+        // Asks the user for their name and number for their order
+        Geek customer = customerDetails();
+
+        // Writes users details and coffee selection to a file
+        submitOrder(customer, usersChoice, matchedCoffees, userCoffee);
 
 
     }
@@ -91,7 +105,7 @@ public class MenuSearcher {
                     extras.add(extraElement.trim());
                 }
 
-                String description = splitOne[3];
+                String description = splitOne[3].replace("]","");
 
                 // Sending all our variables to our coffee class to create a coffee object
                 Coffee coffee = new Coffee(id, name, price, shots, sugar, milk, extras, description);
@@ -216,42 +230,156 @@ public class MenuSearcher {
         return usersCoffee;
     }
 
-    public String matchedCoffee(Coffee coffee) {
-        // TODO - This should be a string... unless its a stringbuilder... but probably a list, just not sure what
-        // TODO - this part of the program looks like, most likely a list of coffees to be put in a joptiionpane
+    /**
+     * Displays a list of coffees and their details from the database that match the users criteria
+     * for what they want to order. It then asks the user which of the listed coffees they would like
+     * and returns that choice
+     * @param coffeeMatches a map of all coffees that match the users criteria from the db
+     * @return the users choice of coffee from the given list.
+     */
+    // TODO - Explain everyline inside the function... I didn't comment enough as i went
+    private static String selectedCoffee(Map<String, Coffee> coffeeMatches) {
+        // TODO - DIsplay id number for drink in drinks display
+        StringBuilder displayMessage = new StringBuilder();
+        displayMessage.append("Matches found!! The following coffees meet your criteria:\n\n");
+        for (Coffee coffee : coffeeMatches.values()) {
+            // Decided to split the appended message into strings first before chaining it in the builder as it was a
+            // 30 odd length chain... seemed ridiculous.
+            String divider = "*****************************************************\n\n";
+            String name = coffee.getName() + "\n";
+            String description = coffee.getDescription() + "\n";
+            // TODO - Milk needs to be handled like extras is below... multiple for some
+            String milk = "Ingredients:\nMilk: " + coffee.getMilk() + "\n";
+            String shots = "Number of shots: " + coffee.getShots() + "\n";
+            String sugar = "Sugar: " + coffee.getSugar() + "\n";
 
-        return matchedCoffee(coffee);
+            // TODO - Used this twice, in two different places, consider extracting to function
+            StringBuilder extrasList = new StringBuilder();
+            for (String extra : coffee.getExtras()) {
+                // If it's the last element in the list, append it without a comma and space
+                if (!extra.equals(coffee.getExtras().getLast())) {extrasList.append(extra).append(", ");}
+                else {
+                    extrasList.append(extra);
+                }
+
+                // otherwise append the extra with a comma and space for the next one.
+
+            }
+            String extras = "Extras: " + extrasList + "\n";
+            String price = "Price: $" + coffee.getPrice() + "\n";
+
+            // Appand all the strings in an orderly manner
+            displayMessage.append(divider).append(name).append(description).append(milk)
+                    .append(shots).append(sugar).append(extras).append(price);
+        }
+        // TODO - Add a no thankyou so that he user doesn't have to order any of the selected and it exits the program.
+        // TODO - Also potentially a search again in stead of selection. "Please select your chioec" rather then selected your coffee
+        return (String) JOptionPane.showInputDialog(null, displayMessage + "Which coffee would you like:", appName, JOptionPane.QUESTION_MESSAGE,
+                null, coffeeMatches.keySet().toArray(),"");
+
     }
 
-//    private boolean isIntValue(int number) {
-//        Pattern pattern = Pattern.compile("^[0-100]$");
-//        Matcher matcher = pattern.matcher(number);
-//        return matcher.matches();
-//
-//    }
 
 
 
+    // TODO - null case again probably
     /**
      * Asks the customer for their name and phone number and creates a Geek
      * object using this information
      * @return a Geek object containing our customers information
      */
-    public Geek customerDetails(){
-        // Ask the user to enter their name and phone number
-        String name = JOptionPane.showInputDialog("Please enter your name (First Last)");
-        long number = Long.parseLong(JOptionPane.showInputDialog("Please enter your phone number (04xxxxxxxx)"));
+    private static Geek customerDetails(){
+        // Ask the user to enter their first and last name and check if it is correct.
+        String name;
+        do {
+            name = JOptionPane.showInputDialog("Please enter your name (First Last)");
+        }
+        while (!isValidNames(name));
 
+        // Ask the user to enter their phone number and check if it is correct.
+        String number;
+        do {
+            number = JOptionPane.showInputDialog("Please enter your phone number (04xxxxxxxx)");
+        }
+        while (!isValidPhoneNumber(number));
+
+        JOptionPane.showMessageDialog(null, "Thankyou, your order has been placed.");
         // Return the created geek object from the users input
         return new Geek(name, number);
         // TODO - return statement might not work, test it when i get to it.
 
     }
+    // TODO this whole method is missing comments and some lines as i rushed to finish it today... which wont be today when i read this
+    private static void submitOrder(Geek geek, String coffee, Map<String, Coffee> allCoffees, Coffee usersCoffee){
+        // TODO - Unsure if this is the correct filename format wanted
+        String fileName = "Order-Number-" + geek.phoneNumber();
 
-    public void sumbitOrder(Geek geek, Coffee coffee){
-        // TODO - Unsure if this takes in a coffee yet, will find out soon, prints everything to a txt file
+        // Get the users details in correct format and as a string
+        String usersDetails = "\tName: " + geek.name() + " (" + geek.phoneNumber() + ") \n";
+
+        // Get the users selected coffees details in correct format and in string form
+        Coffee selectedCoffee = allCoffees.get(coffee);
+        String item = "\tItem: " + selectedCoffee.getName() + " (" + selectedCoffee.getId() + ")\n";
+        String milk = "\tMilk: " + usersCoffee.getMilk() + "\n";
+
+        // Everything for ectrasdasdefgads
+        StringBuilder extrasList = new StringBuilder();
+        for (String extra : usersCoffee.getExtras()) {
+            // If it's the last element in the list, append it without a comma and space
+            if (!extra.equals(usersCoffee.getExtras().getLast())) {extrasList.append(extra).append(", ");}
+            else {extrasList.append(extra);}
+            // otherwise append the extra with a comma and space for the next one.
+
+        }
+
+        String extras = "\tExtras: " + extrasList;
+
+        // TODO replace with builder maybe
+        String orderMessage = "Order details:\n" + usersDetails + item + milk + extras;
+        // Set the path of the file to be created as the name of the name
+        Path path = Path.of("./" + fileName + ".txt");
+
+        try {
+            Files.writeString(path, orderMessage);
+        }
+        catch(IOException e) {
+            System.out.println(e);
+        }
     }
 
-    // TODO - Probably a bunch of regex method checks for input control
+    /**
+     * Compares a given string against a predetermined squence of charaters to determine if
+     * customer input is correct. In this case the format of the users first and last name
+     * @param names - customers first and last name
+     * @return boolean True of False whether the input matched the required format
+     */
+    public static boolean isValidNames(String names) {
+        // Create a pattern object containing the required format
+        // TODO - Perhaps I need to bullet proof the name regex, it might not work for all types of names with spec chars
+        Pattern pattern = Pattern.compile("^[a-zA-z]+\\s[a-zA-Z]+$");
+
+        // Match the users input against the required format
+        Matcher matcher = pattern.matcher(names);
+
+        // Return the result
+        return matcher.matches();
+    }
+
+    /**
+     * Compares a given string against a predetermined squence of charaters to determine if
+     * customer input is correct. In this case the format of a phone number
+     * @param number - customer phone number asked to be input
+     * @return boolean True of False whether or not the input matched the required format
+     */
+    public static boolean isValidPhoneNumber(String number) {
+        // Create a pattern object containing the required format
+        Pattern pattern = Pattern.compile("^04\\d{8}$");
+
+        // Match the users input against the required format
+        Matcher matcher = pattern.matcher(number);
+
+        // Return the result
+        return matcher.matches();
+    }
 
 }

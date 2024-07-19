@@ -27,8 +27,8 @@ public class Menu {
      * @return a list of coffees from the database that match the user's neeeds
      */
     // TODO - Come up with a better name
-    public List<Coffee> compareCoffee(Coffee usersCoffee){
-        List<Coffee> coffeeResults = new ArrayList<>();
+    public Map<String, Coffee> compareCoffee(Coffee usersCoffee){
+        Map<String, Coffee> coffeeResults = new HashMap<>();
         // TODO - Everything... I think it's just a bunch of if statements linked one after another
         // TODO - Dont forget the null case.
         for (Coffee coffee : coffeeMenu) {
@@ -40,7 +40,7 @@ public class Menu {
                         if (coffee.getSugar().equalsIgnoreCase(usersCoffee.getSugar())) {
                             for (String extra : usersCoffee.getExtras()) {
                                 if (coffee.getExtras().contains(extra)) {
-                                    coffeeResults.add(coffee);
+                                    coffeeResults.put(coffee.getName(), coffee);
                                     break;
                                 }
                             }
