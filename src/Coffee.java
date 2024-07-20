@@ -9,8 +9,6 @@ import java.util.List;
  */
 
 public class Coffee {
-    // TODO - USERS milk selection isnt a list but some coffees have multiple milks....
-    // TODO - Initializing due to multiple constructs as well as FLOATS needing F at end... maybe Double
     // Data fields
     private final long id;
     private final String name;
@@ -24,7 +22,7 @@ public class Coffee {
     private float max;
 
     /**
-     * TODO - Read over these and change them if i decide to make lists of some of the fields below instead of strings
+     * Constructor for the Coffee class
      * @param id - The coffee's id
      * @param name - The coffee's name
      * @param price - The coffee's price
@@ -45,27 +43,6 @@ public class Coffee {
         this.description = description;
 
     }
-//     TODO - Consider making a default constructor to initialize values so i can use a multi constructor approach
-//    /**
-//     * Second constructor to handle the user's desired drink selection, major difference is price
-//     * range of min and max.
-//     * @param milk - user's selected milk prefference
-//     * @param shots - User's selected amount of shots
-//     * @param sugar - User's choice of sugar
-//     * @param extras - A list of the extras the user's wants
-//     * @param min - the min price a user is willing to pay
-//     * @param max - the max price a user is willing to pay
-//     */
-//    public Coffee(String milk, int shots, String sugar, List<String> extras, float min, float max) {
-//        // TODO- consider the milk list string problem
-//        this.milk = Collections.singletonList(milk);
-//        this.shots = shots;
-//        this.sugar = sugar;
-//        this.extras = extras;
-//        this.min = min;
-//        this.max = max;
-//    }
-
 
     // Getters for all our data fields
     /**
@@ -106,9 +83,7 @@ public class Coffee {
     /**
      * @return returns a coffee's Milk option
      */
-    public List<String> getMilk() {
-        return milk;
-    }
+    public List<String> getMilk() {return milk; }
 
     /**
      * @return returns a coffee's Extras
@@ -127,35 +102,37 @@ public class Coffee {
     /**
      * @return returns a user's min price
      */
-    public float getMin() {
-        return min;
-    }
+    public float getMin() {return min; }
 
     /**
      * @return returns a user's max price
      */
-    public float getMax() {
-        return max;
-    }
+    public float getMax() {return max; }
 
     /**
-     *  Sets the lower boun of the users price range
-     * @param min - User's desired minimum amount to spent
+     *  Sets the lower bound of the users price range
+     * @param min, float - User's desired minimum amount to spent
      */
-    public void setMin(float min) {
-        this.min = min;
-    }
+    public void setMin(float min) {this.min = min; }
 
     /**
      *  Sets the upper boun of the users price range
-     * @param max - User's desired minimum amount to spent
+     * @param max, float - User's desired maximum amount to spent
      */
-    public void setMax(float max) {
-        this.max = max;
-    }
+    public void setMax(float max) {this.max = max; }
 
-    // TODO - Add a price range function
+    /**
+     * Takes a users coffee selection and compares it's highest and
+     * lowest price against all coffees in the database and returns
+     * true or false depending on if the coffee falls within the
+     * range
+     * @param usersCoffee, a Coffee object made from the users inputs
+     * @return A boolean depending on whether the equality is true or false
+     */
     public boolean isPriceInRange(Coffee usersCoffee) {
+        // If the minimum the customer input is less than the price of a coffee
+        // from the database, as well as If the maximum the customer input is
+        // Less than the price of a coffee in the database
         return usersCoffee.min <= this.price && usersCoffee.max >= this.price;
     }
 }

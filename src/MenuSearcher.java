@@ -15,9 +15,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MenuSearcher {
+    // TODO add correct author info
+    // TODO LAST - Check all public, private, statics
     // TODO - Add milk to the end of all of the milk names... didnt know where to put this todo
-    // TODO - Price doesnt have following 0 when displaying results
-    // TODO - Handle if the file name already exists
+    // TODO - Handle if the file name already exists, check for file name, add (2) if exists
+    // TODO ive used Imageicon alot... figure a way to use it once.
     private static final String filePath = "./menu.txt";
     private static final String appName = "The Caffeinated Geek";
     private static final String appIcon = "./the_caffeinated_geek.png";
@@ -26,18 +28,23 @@ public class MenuSearcher {
      * The main method of our program
      */
     public static void main(String[] args) {
+        // TODO - Fix icon for every pane, only works in main at the moment
         // Sets the icon for Joptionpans
         ImageIcon icon = new ImageIcon(appIcon);
 
         // Is an objetc of the menu class which contains our database of coffees
         menu = loadMenu();
 
-        // TODO - is fix the statement below to accept this coffee instead of just calling the function
+        // Create a coffee representing the users choices
         Coffee userCoffee = userCoffee();
 
-        // TODO - Handle the no match case
-        // Is a map of coffees that matched the users critera
+        // Is a map of coffees that matched the users criteria
         Map<String, Coffee> matchedCoffees = menu.compareCoffee(userCoffee);
+        if (matchedCoffees.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Sorry, we don't have any coffee's that match " +
+                    "your description",appName, 3, icon);
+            System.exit(0);
+        }
 
         // Is a string of the name of the coffee of the users choice
         String usersChoice = selectedCoffee(matchedCoffees);
@@ -48,17 +55,16 @@ public class MenuSearcher {
         // Writes users details and coffee selection to a file
         submitOrder(customer, usersChoice, matchedCoffees, userCoffee);
 
-
     }
 
-    // TODO - This is pretty poorly wirtten
     /**
      * Opens a file which is our database of drinks, splits each line up into specific details of
-     * each coffee, adds new coffees to list as coffee objects using to information gleamed from
+     * each coffee, adds new coffees to a list as coffee objects using to information gleamed from
      * the file
      * @return Menu object from the Menu class, used to call and control the classes methods and database
      */
     private static Menu loadMenu() {
+        ImageIcon icon = new ImageIcon(appIcon);
         Path path = Path.of(filePath);
         Menu menu = new Menu();
 
@@ -72,12 +78,14 @@ public class MenuSearcher {
             allCoffee.remove(allCoffee.getFirst());
 
             for (String line : allCoffee) {
-                // We have to split our db up in two different ways, first we need to split on the one square bracket
-                // This will separate the milk, extras and description fields from the rest of the data, then it we
+                // We have to split our db up in two different ways, first we need to split on the open square bracket
+                // This will separate the milk, extras and description fields from the rest of the data, then we
                 // can just split at comma and do a little bit of data cleaning to remove some unwanted characters.
-                String[] splitOne = line.split("\\[");
-                String[] coffeeDetails = splitOne[0].split(",");
-                // TODO - Consider extracting the splitting to a diff function for a cleaner solution
+                String[] MilkExtrasDescription = line.split("\\[");
+
+                // Assigning the first half of the above split to a new array of strings which contains most of our
+                // coffee information, and splitting on commas
+                String[] coffeeDetails = MilkExtrasDescription[0].split(",");
 
                 // Assigning all of our split strings to their appropriate variables
                 long id = Long.parseLong(coffeeDetails[0]);
@@ -86,26 +94,41 @@ public class MenuSearcher {
                 int shots = Integer.parseInt(coffeeDetails[3]);
                 String sugar = coffeeDetails[4];
 
-                // TODO - Explain why this is happening and extras below it
-                List<String> tempMilk = List.of(splitOne[1].replace("],", "").split(","));
+                // Creating a temporary list of strings containing our milk options. Removing unwanted characters and
+                // splitting each element at the commas.
+                List<String> tempMilk = List.of(MilkExtrasDescription[1].replace("],", "").split(","));
+
+                // Creating a fresh list of strings to hold our cleaned milk data
                 List<String> milk = new ArrayList<>();
+
+                // Iterating through all elements in the temporary milk list and adding them to the cleaned list
                 for (String milkElement : tempMilk) {
+                    // If the string is empty, we are replacing it with None as the milk option for that coffee
                     if (milkElement.isEmpty()) {
                         milkElement = "None";
                     }
+                    // Finally trimming the string of any white space before adding it to the cleaned list
                     milk.add(milkElement.trim());
                 }
-                // TODO above todo
-                List<String> tempExtras = List.of(splitOne[2].replace("],", "").split(","));
+                // Creating a temporary list of strings containing our extras options. Removing unwanted characters and
+                // splitting each element at the commas.
+                List<String> tempExtras = List.of(MilkExtrasDescription[2].replace("],", "").split(","));
+
+                // Creating a fresh list of strings to hold our cleaned extras data
                 List<String> extras = new ArrayList<>();
+
+                // Iterating through all elements in the temporary extras list and adding them to the cleaned list
                 for (String extraElement : tempExtras) {
+                    // If the string is empty, we are replacing it with No Extras as the extras option for that coffee
                     if (extraElement.isEmpty()) {
                         extraElement = "No Extras";
                     }
+                    // Trimming the extra of any white space before adding it to the cleaned list
                     extras.add(extraElement.trim());
                 }
 
-                String description = splitOne[3].replace("]","");
+                // Cleaning the description for our coffee
+                String description = MilkExtrasDescription[3].replace("]","");
 
                 // Sending all our variables to our coffee class to create a coffee object
                 Coffee coffee = new Coffee(id, name, price, shots, sugar, milk, extras, description);
@@ -114,14 +137,15 @@ public class MenuSearcher {
                 menu.addCoffee(coffee);
             }
         }
+
         catch (IOException e) {
             System.out.println(e);
-            // TODO - Deal with this bertter, joption paone telling a homie it broke
+            JOptionPane.showMessageDialog(null, "There was an error reading the coffee database"
+            , appName, 3, icon);
         }
 
         return menu;
     }
-
 
     /**
      * Asks the customer a series of questions about the drink they would like to order and
@@ -129,60 +153,88 @@ public class MenuSearcher {
      * our menu later on.
      * @return Coffee - a coffee object of our customers desired "order"
      */
-    // TODO - consider removing all the joptionpanes and making a function that calls a pane instead, passing in the Q
-    // TODO- the null pointers... they will be everywhere in here
-    private static Coffee userCoffee(){
-        // TODO - Everything, a series of questions bout coffee
+    private static Coffee userCoffee() {
         ImageIcon icon = new ImageIcon(appIcon);
 
         // Prompt the user on which milk they would like
-        // TODO - Figure out what the null 3 null bullshit is about and correct it
         Milk milk = (Milk) JOptionPane.showInputDialog(null, "What type of milk are you looking for?",
-                appName,JOptionPane.QUESTION_MESSAGE,icon, Milk.values(), Milk.FULLCREAM);
+                appName, JOptionPane.QUESTION_MESSAGE, icon, Milk.values(), Milk.FULLCREAM);
+        // Handles the case of the user exiting at milk choice
+        if (milk == null) {
+            System.exit(0);
+        }
 
-        // Prompt user on how many shots they would like
-        // TODO - Change this to regex for control
-        // TODO - fix the infinite persistence of entering an int when a user hits the close button
-        int shots = 0;
+//      Prompt user on how many shots they would like
+        int shots = -1;
         do {
             try {
-            shots = Integer.parseInt(JOptionPane.showInputDialog(null,"Enter the number shots you would like?",
-                    appName, JOptionPane.QUESTION_MESSAGE));
+                // Setting the message dialog as a string for more control
+                String shotsStr = JOptionPane.showInputDialog(null, "Enter the number shots you would like?",
+                        appName, JOptionPane.QUESTION_MESSAGE);
+
+                // If the string is null, ie the user exited the program, handle the null pointer error
+                if (shotsStr == null) {System.exit(0);}
+
+                // Otherwise convert the string to an int
+                shots = Integer.parseInt(shotsStr);
             }
+            // If the user doesn't enter a positive int
             catch (NumberFormatException e) {
                 // Let the developer know the problem
                 System.out.println(e);
 
                 // Let the user know the problem
-                JOptionPane.showMessageDialog(null,"Please enter a positive integer", appName,
+                JOptionPane.showMessageDialog(null, "Please enter a positive integer", appName,
                         JOptionPane.QUESTION_MESSAGE, icon);
             }
         }
-        while (shots == 0);
+        while (shots < 0);
 
-        // Prompt the user with a yes or no question for whether or not they would like sugar
+        // Prompt the user with a yes or no question for their sugar preference
         int sugarChoice = JOptionPane.showConfirmDialog(null, "Would you like sugar?", appName,
                 JOptionPane.YES_NO_OPTION);
-        String sugar = "";
-        if (sugarChoice == JOptionPane.YES_OPTION) { sugar = "yes";}
-        else {sugar = "no";}
 
-        // TODO - Re explain all of this as it got tehnical with the whole skip and add all situation
-        // Initiating an int to be used for keeping track of extras
+        // Initiate variable for sugar
+        String sugar = "";
+
+        // Control structure for sugar choice, if the user closes the dialog box, this handles the null pointer error
+        if (sugarChoice != 0 && sugarChoice != 1) {
+            System.exit(0);
+        }
+
+        // These two cases handle if the user selects yes or no.
+        else if (sugarChoice == JOptionPane.YES_OPTION) {
+            sugar = "Yes";
+        } else {
+            sugar = "No";
+        }
+
+        // Initiating a list to hold all of the customers extras
         List<String> extras = new ArrayList<>();
+
+        // Initiating an int to be used for keeping track of extras
         int decision = 0;
         while (decision == 0) {
 
             // Prompt the user to select any extras they would like
             String extra = (String) JOptionPane.showInputDialog(null, "What type of milk are you looking for?",
-                    appName, JOptionPane.QUESTION_MESSAGE, null, menu.allExtras().toArray(), "");
+                    appName, JOptionPane.QUESTION_MESSAGE, icon, menu.allExtras().toArray(), "");
 
-            extras.add(extra);
-            // Using the fact that "no" == 1 and "yes" == 0 to control the while loop
+            // Handle the null case
+            if (extra == null) {System.exit(0);}
+
+            // If the user selects Skip, we want to add "No extras" to their order and not the word skip, then we want
+            // to break from the loop to move to the next item
             if (extra.equalsIgnoreCase("Skip")) {
-                extras.addAll(menu.allExtras());
+                extras.add("No Extras");
                 break;
             }
+
+            // Add the extra after a check for "skip"
+            extras.add(extra);
+
+            // Prompt user if they would like to add more extras, using the fact that with a Joptionpane,
+            // "no" == 1 and "yes" == 0 to control the while loop
             decision = JOptionPane.showConfirmDialog(null, "Would you like to add another extra",
                     appName, JOptionPane.YES_NO_OPTION);
         }
@@ -190,17 +242,18 @@ public class MenuSearcher {
         // Initiate price variables
         float min = -1;
         float max = -1;
-        // TODO - NULLPOINTER ERRORS
         // While loop for lowest price range
         while (min < 0) {
             try {
-                min = Float.parseFloat(JOptionPane.showInputDialog(null,"Enter your lowest price:",
+                min = Float.parseFloat(JOptionPane.showInputDialog(null, "Enter your lowest price:",
                         appName, JOptionPane.QUESTION_MESSAGE));
             }
+            // If the user enters and incorrect price
             catch (NumberFormatException e) {
                 System.out.println(e);
                 JOptionPane.showMessageDialog(null, "Please enter a positive price.");
             }
+            // If the user exits out of the program
             catch (NullPointerException e) {
                 System.out.println(e);
                 JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
@@ -208,23 +261,29 @@ public class MenuSearcher {
             }
         }
 
-//        while loop for highest price range
+        // while loop for highest price range
         while (max < min) {
             try {
                 max = Float.parseFloat(JOptionPane.showInputDialog(null, "Enter your highest price:",
                         appName, JOptionPane.QUESTION_MESSAGE));
-            } catch (NumberFormatException e) {
-                System.out.println(e);
-                JOptionPane.showMessageDialog(null, "Please enter a positive price.");
             }
+            // If the user enters a value less then the min or not an int
+            catch (NumberFormatException e) {
+                System.out.println(e);
+                JOptionPane.showMessageDialog(null, "Please enter a positive price greater then the minimum.");
+            }
+            // If the exits the program
             catch (NullPointerException e) {
                 System.out.println(e);
                 JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
                 System.exit(0);
             }
         }
-        // TODO - make sure i am allowed to do this.... cause this should be multiple constructpr  solution
-        Coffee usersCoffee = new Coffee(0, "", 0, shots, sugar, Collections.singletonList(milk.toString()), extras,"");
+
+        // Sends all of the gathered information to the coffee class and creates a coffee object of the users choices.
+        Coffee usersCoffee = new Coffee(0, "user's Coffee", 0, shots, sugar, Collections.singletonList(milk.toString()), extras, "A user's coffee");
+
+        // Sets the min and max price range for the users coffee for comparison later.
         usersCoffee.setMax(max);
         usersCoffee.setMin(min);
         return usersCoffee;
@@ -235,52 +294,68 @@ public class MenuSearcher {
      * for what they want to order. It then asks the user which of the listed coffees they would like
      * and returns that choice
      * @param coffeeMatches a map of all coffees that match the users criteria from the db
-     * @return the users choice of coffee from the given list.
+     * @return String of the name of the users choice of coffee from the given list.
      */
-    // TODO - Explain everyline inside the function... I didn't comment enough as i went
     private static String selectedCoffee(Map<String, Coffee> coffeeMatches) {
-        // TODO - DIsplay id number for drink in drinks display
+        ImageIcon icon = new ImageIcon(appIcon);
+        // Create a stringbuilder to help concatenate all of the information to be displayed to the user
         StringBuilder displayMessage = new StringBuilder();
+
+        // Top line of the message to the user
         displayMessage.append("Matches found!! The following coffees meet your criteria:\n\n");
+
+        // For each coffee that matches the users coffee, print out the information for the coffee.
         for (Coffee coffee : coffeeMatches.values()) {
             // Decided to split the appended message into strings first before chaining it in the builder as it was a
-            // 30 odd length chain... seemed ridiculous.
+            // chain consisting of more than 30 appends... seemed ridiculous and a little redundant.
             String divider = "*****************************************************\n\n";
-            String name = coffee.getName() + "\n";
+            String name = coffee.getName() + " (" + coffee.getId() + ")\n";
             String description = coffee.getDescription() + "\n";
-            // TODO - Milk needs to be handled like extras is below... multiple for some
-            String milk = "Ingredients:\nMilk: " + coffee.getMilk() + "\n";
+
+            // Creating a string builder for our milk options as some coffees have more than one, so displaying them
+            // correctly is not as straight forward as just getting the coffees milk option
+            StringBuilder milkList = new StringBuilder();
+            // For every milk option in a given coffee, add that milk to the string builder
+            for (String milk : coffee.getMilk()) {
+                // If it's not the last element in the list then append it with trailing characters for display
+                if (!milk.equals(coffee.getExtras().getLast())) {milkList.append(milk).append(", ");}
+                else {
+                    // otherwise only append the milk
+                    milkList.append(milk);
+                }
+            }
+            // String for milk option with all milk appended in correct formatting
+            String milk = "Ingredients:\nMilk: " + milkList + "\n";
+
+            // Strings for shots and sugar formatted correctly
             String shots = "Number of shots: " + coffee.getShots() + "\n";
             String sugar = "Sugar: " + coffee.getSugar() + "\n";
 
-            // TODO - Used this twice, in two different places, consider extracting to function
+            // This is the same as the above milk option. Since extras is a list due to coffees having multiple extras
+            // we have to treat it a little different using a stringbuilder and for each loop to control the display
             StringBuilder extrasList = new StringBuilder();
             for (String extra : coffee.getExtras()) {
-                // If it's the last element in the list, append it without a comma and space
+                // If it's not the last element in the list then append it with trailing characters for display
                 if (!extra.equals(coffee.getExtras().getLast())) {extrasList.append(extra).append(", ");}
                 else {
+                    // otherwise only append the extra
                     extrasList.append(extra);
                 }
-
-                // otherwise append the extra with a comma and space for the next one.
-
             }
+            // Finally adding the list of extras as a correctly formatted string
             String extras = "Extras: " + extrasList + "\n";
-            String price = "Price: $" + coffee.getPrice() + "\n";
+            String price = "Price: $" + String.format("%,.2f",coffee.getPrice()) + "\n";
 
             // Appand all the strings in an orderly manner
             displayMessage.append(divider).append(name).append(description).append(milk)
                     .append(shots).append(sugar).append(extras).append(price);
         }
-        // TODO - Add a no thankyou so that he user doesn't have to order any of the selected and it exits the program.
+        // TODO - (COME BACK TO THIS, EXTRA AND NOT NEEDED) Add a no thankyou so that the user doesn't have to order any of the selected and it exits the program.
         // TODO - Also potentially a search again in stead of selection. "Please select your chioec" rather then selected your coffee
+        // Present the user with all of the coffees that match their desired coffee and ask them to select which one they would like
         return (String) JOptionPane.showInputDialog(null, displayMessage + "Which coffee would you like:", appName, JOptionPane.QUESTION_MESSAGE,
-                null, coffeeMatches.keySet().toArray(),"");
-
+                icon, coffeeMatches.keySet().toArray(),"");
     }
-
-
-
 
     // TODO - null case again probably
     /**
@@ -309,8 +384,9 @@ public class MenuSearcher {
         // TODO - return statement might not work, test it when i get to it.
 
     }
+
     // TODO this whole method is missing comments and some lines as i rushed to finish it today... which wont be today when i read this
-    private static void submitOrder(Geek geek, String coffee, Map<String, Coffee> allCoffees, Coffee usersCoffee){
+    private static void submitOrder(Geek geek, String coffee, Map<String, Coffee> allCoffees, Coffee uCoffee){
         // TODO - Unsure if this is the correct filename format wanted
         String fileName = "Order-Number-" + geek.phoneNumber();
 
@@ -320,25 +396,24 @@ public class MenuSearcher {
         // Get the users selected coffees details in correct format and in string form
         Coffee selectedCoffee = allCoffees.get(coffee);
         String item = "\tItem: " + selectedCoffee.getName() + " (" + selectedCoffee.getId() + ")\n";
-        String milk = "\tMilk: " + usersCoffee.getMilk() + "\n";
+        String milk = "\tMilk: " + uCoffee.getMilk() + "\n";
 
         // Everything for ectrasdasdefgads
         StringBuilder extrasList = new StringBuilder();
-        for (String extra : usersCoffee.getExtras()) {
+        for (String extra : uCoffee.getExtras()) {
             // If it's the last element in the list, append it without a comma and space
-            if (!extra.equals(usersCoffee.getExtras().getLast())) {extrasList.append(extra).append(", ");}
+            if (!extra.equals(uCoffee.getExtras().getLast())) {extrasList.append(extra).append(", ");}
             else {extrasList.append(extra);}
             // otherwise append the extra with a comma and space for the next one.
 
         }
 
         String extras = "\tExtras: " + extrasList;
-
         // TODO replace with builder maybe
         String orderMessage = "Order details:\n" + usersDetails + item + milk + extras;
         // Set the path of the file to be created as the name of the name
         Path path = Path.of("./" + fileName + ".txt");
-
+// TODO figure out what im catching here
         try {
             Files.writeString(path, orderMessage);
         }

@@ -22,24 +22,25 @@ public class Menu {
 
     /**
      * Compares a user's coffee to a list of coffee in the data and adds each coffee
-     * that matches the user's select to a new List, then returns that list.
+     * that matches the user's select to a map, then returns that map.
      * @param usersCoffee - a coffee object comprised of the user's selected coffee options
-     * @return a list of coffees from the database that match the user's neeeds
+     * @return a map of coffees from the database that match the user's needs as the name
+     * as the key and the coffee pbject itself as the value
      */
-    // TODO - Come up with a better name
     public Map<String, Coffee> compareCoffee(Coffee usersCoffee){
         Map<String, Coffee> coffeeResults = new HashMap<>();
-        // TODO - Everything... I think it's just a bunch of if statements linked one after another
-        // TODO - Dont forget the null case.
         for (Coffee coffee : coffeeMenu) {
-            // TODO - Perhaps change control structure from nested ifs
-            // Checks which coffees in the database the users milk choice matches with
+            // TODO - Perhaps change control structure from nested ifs (I tried and broke the program, so leave till end)
+            // A series of nested if statements to check if user's desired coffee exists in the database
             if (coffee.getMilk().contains(usersCoffee.getMilk().getFirst())) {
                 if (coffee.getShots() == usersCoffee.getShots()) {
                     if (coffee.isPriceInRange(usersCoffee)) {
                         if (coffee.getSugar().equalsIgnoreCase(usersCoffee.getSugar())) {
+
+                            // Checks all potential extras the user may have selected, if one matches
+                            // it adds the coffee and breaks out of this loop.
                             for (String extra : usersCoffee.getExtras()) {
-                                if (coffee.getExtras().contains(extra)) {
+                                if (coffee.getExtras().contains(extra) || extra.equalsIgnoreCase("No extras")) {
                                     coffeeResults.put(coffee.getName(), coffee);
                                     break;
                                 }
@@ -49,6 +50,7 @@ public class Menu {
                 }
             }
         }
+        // Return our map
         return coffeeResults;
     }
 
@@ -60,7 +62,6 @@ public class Menu {
     public Set<String> allExtras(){
         Set<String> allExtras = new HashSet<>();
 
-        // TODO - Can replace statement with a collections.addall... but might not be exatcly what i want.
         // Nested for loop to first get all the coffee objects from our menu
         // Then get all the extras from each coffee and assign them to our set
         for (Coffee coffee : coffeeMenu) {
