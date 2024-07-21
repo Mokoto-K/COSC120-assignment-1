@@ -29,27 +29,24 @@ public class Menu {
      */
     public Map<String, Coffee> compareCoffee(Coffee usersCoffee){
         Map<String, Coffee> coffeeResults = new HashMap<>();
-        for (Coffee coffee : coffeeMenu) {
-            // TODO - Perhaps change control structure from nested ifs (I tried and broke the program, so leave till end)
-            // A series of nested if statements to check if user's desired coffee exists in the database
-            if (coffee.getMilk().contains(usersCoffee.getMilk().getFirst())) {
-                if (coffee.getShots() == usersCoffee.getShots()) {
-                    if (coffee.isPriceInRange(usersCoffee)) {
-                        if (coffee.getSugar().equalsIgnoreCase(usersCoffee.getSugar())) {
 
-                            // Checks all potential extras the user may have selected, if one matches
-                            // it adds the coffee and breaks out of this loop.
-                            for (String extra : usersCoffee.getExtras()) {
-                                if (coffee.getExtras().contains(extra) || extra.equalsIgnoreCase("No extras")) {
-                                    coffeeResults.put(coffee.getName(), coffee);
-                                    break;
+        for (Coffee coffee : coffeeMenu) {
+            // A series of  if statements to check if user's desired coffee exists in the database
+            if (!coffee.getMilk().contains(usersCoffee.getMilk().getFirst())) { continue; }
+            if (coffee.getShots() != usersCoffee.getShots()) {continue;}
+            if (!coffee.isPriceInRange(usersCoffee)) {continue;}
+            if (!coffee.getSugar().equalsIgnoreCase(usersCoffee.getSugar())) {continue;}
+
+            // Checks all potential extras the user may have selected, if one matches
+            // it adds the coffee and breaks out of this loop
+            for (String extra : usersCoffee.getExtras()) {
+                if (coffee.getExtras().contains(extra) || extra.equalsIgnoreCase("No extras")) {
+                    coffeeResults.put(coffee.getName(), coffee);
+                    break;
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
+
         // Return our map
         return coffeeResults;
     }

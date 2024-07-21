@@ -16,21 +16,15 @@ import java.util.regex.Pattern;
 
 public class MenuSearcher {
     // TODO add correct author info
-    // TODO LAST - Check all public, private, statics
-    // TODO - Add milk to the end of all of the milk names... didnt know where to put this todo
-    // TODO - Handle if the file name already exists, check for file name, add (2) if exists
-    // TODO ive used Imageicon alot... figure a way to use it once.
     private static final String filePath = "./menu.txt";
     private static final String appName = "The Caffeinated Geek";
-    private static final String appIcon = "./the_caffeinated_geek.png";
+    private static final ImageIcon icon = new ImageIcon("./the_caffeinated_geek.png");
     private static Menu menu;
     /**
      * The main method of our program
      */
     public static void main(String[] args) {
-        // TODO - Fix icon for every pane, only works in main at the moment
         // Sets the icon for Joptionpans
-        ImageIcon icon = new ImageIcon(appIcon);
 
         // Is an objetc of the menu class which contains our database of coffees
         menu = loadMenu();
@@ -42,7 +36,7 @@ public class MenuSearcher {
         Map<String, Coffee> matchedCoffees = menu.compareCoffee(userCoffee);
         if (matchedCoffees.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Sorry, we don't have any coffee's that match " +
-                    "your description",appName, 3, icon);
+                    "your description",appName, JOptionPane.INFORMATION_MESSAGE, icon);
             System.exit(0);
         }
 
@@ -53,7 +47,7 @@ public class MenuSearcher {
         Geek customer = customerDetails();
 
         // Writes users details and coffee selection to a file
-        submitOrder(customer, usersChoice, matchedCoffees, userCoffee);
+        submitOrder(customer, usersChoice, userCoffee);
 
     }
 
@@ -64,12 +58,12 @@ public class MenuSearcher {
      * @return Menu object from the Menu class, used to call and control the classes methods and database
      */
     private static Menu loadMenu() {
-        ImageIcon icon = new ImageIcon(appIcon);
+//        ImageIcon icon = new ImageIcon(appIcon);
         Path path = Path.of(filePath);
         Menu menu = new Menu();
 
         // Creating a list of strings to temporarily hold our database information so we can iterate through each one.
-        List<String> allCoffee = new ArrayList<>();
+        List<String> allCoffee;
         try {
             // Read all lines in from out database and place them in a list of strings
             allCoffee = Files.readAllLines(path);
@@ -139,9 +133,9 @@ public class MenuSearcher {
         }
 
         catch (IOException e) {
-            System.out.println(e);
+            System.out.println("A File error occurred" + e);
             JOptionPane.showMessageDialog(null, "There was an error reading the coffee database"
-            , appName, 3, icon);
+            , appName, JOptionPane.INFORMATION_MESSAGE, icon);
         }
 
         return menu;
@@ -154,8 +148,6 @@ public class MenuSearcher {
      * @return Coffee - a coffee object of our customers desired "order"
      */
     private static Coffee userCoffee() {
-        ImageIcon icon = new ImageIcon(appIcon);
-
         // Prompt the user on which milk they would like
         Milk milk = (Milk) JOptionPane.showInputDialog(null, "What type of milk are you looking for?",
                 appName, JOptionPane.QUESTION_MESSAGE, icon, Milk.values(), Milk.FULLCREAM);
@@ -181,7 +173,7 @@ public class MenuSearcher {
             // If the user doesn't enter a positive int
             catch (NumberFormatException e) {
                 // Let the developer know the problem
-                System.out.println(e);
+                System.out.println("User enter the wrong number format" + e);
 
                 // Let the user know the problem
                 JOptionPane.showMessageDialog(null, "Please enter a positive integer", appName,
@@ -250,12 +242,12 @@ public class MenuSearcher {
             }
             // If the user enters and incorrect price
             catch (NumberFormatException e) {
-                System.out.println(e);
+                System.out.println("User entered the wrong number format" + e);
                 JOptionPane.showMessageDialog(null, "Please enter a positive price.");
             }
             // If the user exits out of the program
             catch (NullPointerException e) {
-                System.out.println(e);
+                System.out.println("User exited the program" + e);
                 JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
                 System.exit(0);
             }
@@ -269,12 +261,12 @@ public class MenuSearcher {
             }
             // If the user enters a value less then the min or not an int
             catch (NumberFormatException e) {
-                System.out.println(e);
+                System.out.println("User entered the wrong number format" + e);
                 JOptionPane.showMessageDialog(null, "Please enter a positive price greater then the minimum.");
             }
             // If the exits the program
             catch (NullPointerException e) {
-                System.out.println(e);
+                System.out.println("User exited the program" + e);
                 JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
                 System.exit(0);
             }
@@ -294,10 +286,9 @@ public class MenuSearcher {
      * for what they want to order. It then asks the user which of the listed coffees they would like
      * and returns that choice
      * @param coffeeMatches a map of all coffees that match the users criteria from the db
-     * @return String of the name of the users choice of coffee from the given list.
+     * @return String of the name of the users choice of coffee from the given list appended with the coffees id
      */
     private static String selectedCoffee(Map<String, Coffee> coffeeMatches) {
-        ImageIcon icon = new ImageIcon(appIcon);
         // Create a stringbuilder to help concatenate all of the information to be displayed to the user
         StringBuilder displayMessage = new StringBuilder();
 
@@ -318,7 +309,7 @@ public class MenuSearcher {
             // For every milk option in a given coffee, add that milk to the string builder
             for (String milk : coffee.getMilk()) {
                 // If it's not the last element in the list then append it with trailing characters for display
-                if (!milk.equals(coffee.getExtras().getLast())) {milkList.append(milk).append(", ");}
+                if (!milk.equals(coffee.getMilk().getLast())) {milkList.append(milk).append(", ");}
                 else {
                     // otherwise only append the milk
                     milkList.append(milk);
@@ -346,18 +337,19 @@ public class MenuSearcher {
             String extras = "Extras: " + extrasList + "\n";
             String price = "Price: $" + String.format("%,.2f",coffee.getPrice()) + "\n";
 
-            // Appand all the strings in an orderly manner
+            // Append all the strings in an orderly manner
             displayMessage.append(divider).append(name).append(description).append(milk)
                     .append(shots).append(sugar).append(extras).append(price);
         }
-        // TODO - (COME BACK TO THIS, EXTRA AND NOT NEEDED) Add a no thankyou so that the user doesn't have to order any of the selected and it exits the program.
-        // TODO - Also potentially a search again in stead of selection. "Please select your chioec" rather then selected your coffee
         // Present the user with all of the coffees that match their desired coffee and ask them to select which one they would like
-        return (String) JOptionPane.showInputDialog(null, displayMessage + "Which coffee would you like:", appName, JOptionPane.QUESTION_MESSAGE,
+        String choice = (String) JOptionPane.showInputDialog(null, displayMessage + "Which coffee would you like:", appName, JOptionPane.QUESTION_MESSAGE,
                 icon, coffeeMatches.keySet().toArray(),"");
+        if (choice == null) {System.exit(0);}
+        // Take the users choice and query the map to add the id to the name for later use when writing to file
+        // This saves us from having to pass a map into a future function
+        return coffeeMatches.get(choice).getName() + " ("+ coffeeMatches.get(choice).getId() + ")";
     }
 
-    // TODO - null case again probably
     /**
      * Asks the customer for their name and phone number and creates a Geek
      * object using this information
@@ -367,71 +359,86 @@ public class MenuSearcher {
         // Ask the user to enter their first and last name and check if it is correct.
         String name;
         do {
-            name = JOptionPane.showInputDialog("Please enter your name (First Last)");
+            name = JOptionPane.showInputDialog("Please enter your full name (John Doe)");
+            if (name == null) {System.exit(0);}
         }
+        // send the user input to the isValidName function to check if it is correctly formatted
         while (!isValidNames(name));
 
         // Ask the user to enter their phone number and check if it is correct.
         String number;
         do {
             number = JOptionPane.showInputDialog("Please enter your phone number (04xxxxxxxx)");
+            if (number == null) {System.exit(0);}
         }
+        // Send the users input to the isValidPhoneNumber function to check if it is correctly formatted
         while (!isValidPhoneNumber(number));
 
-        JOptionPane.showMessageDialog(null, "Thankyou, your order has been placed.");
         // Return the created geek object from the users input
         return new Geek(name, number);
-        // TODO - return statement might not work, test it when i get to it.
-
     }
 
-    // TODO this whole method is missing comments and some lines as i rushed to finish it today... which wont be today when i read this
-    private static void submitOrder(Geek geek, String coffee, Map<String, Coffee> allCoffees, Coffee uCoffee){
-        // TODO - Unsure if this is the correct filename format wanted
+    /**
+     * Takes the user's information, the name of the coffee they wish to order, and a coffee object containing
+     * the user's question choices and systematically adds all relevant information to a String that is then
+     * used to write a txt file of the user's order.
+     * @param geek - A geek object of with the users name and phone number (phone number used for order number)
+     * @param coffeeName - A String containing the name of the coffee the user has chosen to order
+     * @param uCoffee - The coffee object that contains all of the users choices
+     */
+    private static void submitOrder(Geek geek, String coffeeName, Coffee uCoffee){
+        // Set the name of our file using the users phone number
         String fileName = "Order-Number-" + geek.phoneNumber();
 
         // Get the users details in correct format and as a string
         String usersDetails = "\tName: " + geek.name() + " (" + geek.phoneNumber() + ") \n";
 
         // Get the users selected coffees details in correct format and in string form
-        Coffee selectedCoffee = allCoffees.get(coffee);
-        String item = "\tItem: " + selectedCoffee.getName() + " (" + selectedCoffee.getId() + ")\n";
-        String milk = "\tMilk: " + uCoffee.getMilk() + "\n";
+        String item = "\tItem: " + coffeeName + "\n";
+        String milk = "\tMilk: " + uCoffee.getMilk().getFirst() + "\n";
 
-        // Everything for ectrasdasdefgads
+        // Create a string builder to hold all of the customers extras choices
         StringBuilder extrasList = new StringBuilder();
+        // Iterate through every choice
         for (String extra : uCoffee.getExtras()) {
-            // If it's the last element in the list, append it without a comma and space
+            // If the extra isnt the last one in the list, then append a comma and a space
+            // this is only used for visual appearance to the customer
             if (!extra.equals(uCoffee.getExtras().getLast())) {extrasList.append(extra).append(", ");}
+            // Otherwise just append the last extra
             else {extrasList.append(extra);}
-            // otherwise append the extra with a comma and space for the next one.
-
         }
 
+        // format the extras string using the stringBuilder from above
         String extras = "\tExtras: " + extrasList;
-        // TODO replace with builder maybe
+
+        // Create the string to be saved in the order file
         String orderMessage = "Order details:\n" + usersDetails + item + milk + extras;
-        // Set the path of the file to be created as the name of the name
+        // Set the path of the file to be created as the filename we assigned above
         Path path = Path.of("./" + fileName + ".txt");
-// TODO figure out what im catching here
+
         try {
+
+            // Create the file and write the order
             Files.writeString(path, orderMessage);
+            JOptionPane.showMessageDialog(null, "Thankyou, your order has been placed.");
         }
         catch(IOException e) {
-            System.out.println(e);
+            System.out.println("Error writing the file" + e);
+            JOptionPane.showMessageDialog(null, "Sorry, there was an error when creating your order.");
         }
     }
 
     /**
      * Compares a given string against a predetermined squence of charaters to determine if
      * customer input is correct. In this case the format of the users first and last name
-     * @param names - customers first and last name
+     * @param names - User input of their first and last name
      * @return boolean True of False whether the input matched the required format
      */
     public static boolean isValidNames(String names) {
         // Create a pattern object containing the required format
-        // TODO - Perhaps I need to bullet proof the name regex, it might not work for all types of names with spec chars
-        Pattern pattern = Pattern.compile("^[a-zA-z]+\\s[a-zA-Z]+$");
+        // Lets a user enter however many names are in their full name as well as fullstops,
+        // hyphens, and apostrophe, only letters allowed, not case-sensitive. this covers most cases.
+        Pattern pattern = Pattern.compile("^[a-zA-Z '.-]*$");
 
         // Match the users input against the required format
         Matcher matcher = pattern.matcher(names);
@@ -448,6 +455,7 @@ public class MenuSearcher {
      */
     public static boolean isValidPhoneNumber(String number) {
         // Create a pattern object containing the required format
+        // format is 10 digits starting with 04
         Pattern pattern = Pattern.compile("^04\\d{8}$");
 
         // Match the users input against the required format
