@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 public class MenuSearcher {
     // TODO add author header info
+    // TODO Check all strings for correct information with user input
     private static final String filePath = "./menu.txt";
     private static final String appName = "The Caffeinated Geek";
     private static final ImageIcon icon = new ImageIcon("./the_caffeinated_geek.png");
@@ -207,7 +208,7 @@ public class MenuSearcher {
         while (decision == 0) {
 
             // Prompt the user to select any extras they would like
-            String extra = (String) JOptionPane.showInputDialog(null, "What type of milk are you looking for?",
+            String extra = (String) JOptionPane.showInputDialog(null, "Would you like to add any extras?",
                     appName, JOptionPane.QUESTION_MESSAGE, icon, menu.allExtras().toArray(), "");
 
             // Handle the null case
