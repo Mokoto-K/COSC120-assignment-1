@@ -15,18 +15,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MenuSearcher {
-    // TODO add correct author info
+    // TODO add author header info
     private static final String filePath = "./menu.txt";
     private static final String appName = "The Caffeinated Geek";
     private static final ImageIcon icon = new ImageIcon("./the_caffeinated_geek.png");
     private static Menu menu;
+
     /**
      * The main method of our program
      */
     public static void main(String[] args) {
-        // Sets the icon for Joptionpans
-
-        // Is an objetc of the menu class which contains our database of coffees
+        // Is an object of the menu class which contains our database of coffees
         menu = loadMenu();
 
         // Create a coffee representing the users choices
@@ -58,7 +57,6 @@ public class MenuSearcher {
      * @return Menu object from the Menu class, used to call and control the classes methods and database
      */
     private static Menu loadMenu() {
-//        ImageIcon icon = new ImageIcon(appIcon);
         Path path = Path.of(filePath);
         Menu menu = new Menu();
 
@@ -82,7 +80,7 @@ public class MenuSearcher {
                 String[] coffeeDetails = MilkExtrasDescription[0].split(",");
 
                 // Assigning all of our split strings to their appropriate variables
-                long id = Long.parseLong(coffeeDetails[0]);
+                int id = Integer.parseInt(coffeeDetails[0]);
                 String name = coffeeDetails[1];
                 float price = Float.parseFloat(coffeeDetails[2]);
                 int shots = Integer.parseInt(coffeeDetails[3]);
@@ -201,9 +199,9 @@ public class MenuSearcher {
             sugar = "No";
         }
 
-        // Initiating a list to hold all of the customers extras
-        List<String> extras = new ArrayList<>();
-
+        // Initiating a set to temporarily hold the extras the user picks, this is to prevent duplicates of the same
+        // extra appearing in there coffee object.
+        Set<String> tempExtras = new HashSet<>();
         // Initiating an int to be used for keeping track of extras
         int decision = 0;
         while (decision == 0) {
@@ -217,19 +215,26 @@ public class MenuSearcher {
 
             // If the user selects Skip, we want to add "No extras" to their order and not the word skip, then we want
             // to break from the loop to move to the next item
-            if (extra.equalsIgnoreCase("Skip")) {
-                extras.add("No Extras");
+            if (extra.equalsIgnoreCase("Skip") && tempExtras.isEmpty()) {
+                tempExtras.add("No Extras");
                 break;
             }
+            else if (extra.equalsIgnoreCase("Skip")) {break; }
 
             // Add the extra after a check for "skip"
-            extras.add(extra);
+            tempExtras.add(extra);
+
+
 
             // Prompt user if they would like to add more extras, using the fact that with a Joptionpane,
             // "no" == 1 and "yes" == 0 to control the while loop
             decision = JOptionPane.showConfirmDialog(null, "Would you like to add another extra",
                     appName, JOptionPane.YES_NO_OPTION);
         }
+
+         // Converting the set of extras to a list as lists provide a few extra (excuse the pun) features that I need
+         //to use in this project, such as .getlast()
+        List<String> extras = new ArrayList<>(tempExtras);
 
         // Initiate price variables
         float min = -1;

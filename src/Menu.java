@@ -32,7 +32,7 @@ public class Menu {
 
         for (Coffee coffee : coffeeMenu) {
             // A series of  if statements to check if user's desired coffee exists in the database
-            if (!coffee.getMilk().contains(usersCoffee.getMilk().getFirst())) { continue; }
+            if (!coffee.getMilk().contains(usersCoffee.getMilk().getFirst())) {continue; }
             if (coffee.getShots() != usersCoffee.getShots()) {continue;}
             if (!coffee.isPriceInRange(usersCoffee)) {continue;}
             if (!coffee.getSugar().equalsIgnoreCase(usersCoffee.getSugar())) {continue;}

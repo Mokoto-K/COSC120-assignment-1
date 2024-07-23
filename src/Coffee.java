@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Coffee {
     // Data fields
-    private final long id;
+    private final int id;
     private final String name;
     private final float price;
     private final int shots;
@@ -32,7 +32,7 @@ public class Coffee {
      * @param extras - Any extras for the coffee
      * @param description - The coffee's description
      */
-    public Coffee(long id, String name, float price, int shots, String sugar, List<String> milk, List<String> extras, String description){
+    public Coffee(int id, String name, float price, int shots, String sugar, List<String> milk, List<String> extras, String description){
         this.id = id;
         this.name = name;
         this.price = price;
