@@ -1,8 +1,9 @@
 /**
- * @author Enter name
- * Email: Enter email
+ *
  * COSC120 - Assignment 1
- * Date: 15/07/24
+ * Date: 24/07/24
+ * A solution for the problems currently haunting
+ * the good people at the Caffinated Geek.
  */
 
 /**

@@ -1,8 +1,9 @@
 /**
- * @author Enter name
- * Email: Enter email
+ *
  * COSC120 - Assignment 1
- * Date: 15/07/24
+ * Date: 24/07/24
+ * A solution for the problems currently haunting
+ * the good people at the Caffinated Geek.
  */
 
 import javax.swing.*;
@@ -15,11 +16,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MenuSearcher {
-    // TODO add author header info
-    // TODO Check all strings for correct information with user input
+    // a string that contains the filepath of our database
     private static final String filePath = "./menu.txt";
+
+    // Initiating the title and icon for all of the input text boxes
     private static final String appName = "The Caffeinated Geek";
     private static final ImageIcon icon = new ImageIcon("./the_caffeinated_geek.png");
+
+    // The menu object that will be used to control our database
     private static Menu menu;
 
     /**
@@ -152,7 +156,9 @@ public class MenuSearcher {
                 appName, JOptionPane.QUESTION_MESSAGE, icon, Milk.values(), Milk.FULLCREAM);
         // Handles the case of the user exiting at milk choice
         if (milk == null) {
+            JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
             System.exit(0);
+
         }
 
 //      Prompt user on how many shots they would like
@@ -164,7 +170,11 @@ public class MenuSearcher {
                         appName, JOptionPane.QUESTION_MESSAGE);
 
                 // If the string is null, ie the user exited the program, handle the null pointer error
-                if (shotsStr == null) {System.exit(0);}
+                if (shotsStr == null) {
+                    JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
+                    System.exit(0);
+                }
+
 
                 // Otherwise convert the string to an int
                 shots = Integer.parseInt(shotsStr);
@@ -190,6 +200,7 @@ public class MenuSearcher {
 
         // Control structure for sugar choice, if the user closes the dialog box, this handles the null pointer error
         if (sugarChoice != 0 && sugarChoice != 1) {
+            JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
             System.exit(0);
         }
 
@@ -212,7 +223,10 @@ public class MenuSearcher {
                     appName, JOptionPane.QUESTION_MESSAGE, icon, menu.allExtras().toArray(), "");
 
             // Handle the null case
-            if (extra == null) {System.exit(0);}
+            if (extra == null) {
+                JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
+                System.exit(0);
+            }
 
             // If the user selects Skip, we want to add "No extras" to their order and not the word skip, then we want
             // to break from the loop to move to the next item
@@ -224,8 +238,6 @@ public class MenuSearcher {
 
             // Add the extra after a check for "skip"
             tempExtras.add(extra);
-
-
 
             // Prompt user if they would like to add more extras, using the fact that with a Joptionpane,
             // "no" == 1 and "yes" == 0 to control the while loop
@@ -295,65 +307,28 @@ public class MenuSearcher {
      * @return String of the name of the users choice of coffee from the given list appended with the coffees id
      */
     private static String selectedCoffee(Map<String, Coffee> coffeeMatches) {
-        // Create a stringbuilder to help concatenate all of the information to be displayed to the user
+
         StringBuilder displayMessage = new StringBuilder();
 
         // Top line of the message to the user
         displayMessage.append("Matches found!! The following coffees meet your criteria:\n\n");
 
-        // For each coffee that matches the users coffee, print out the information for the coffee.
+        // For each coffee that matches the users coffee, call the "coffeeDescription method" and
+        // append the information for the coffee to the stringBuilder
         for (Coffee coffee : coffeeMatches.values()) {
-            // Decided to split the appended message into strings first before chaining it in the builder as it was a
-            // chain consisting of more than 30 appends... seemed ridiculous and a little redundant.
-            String divider = "*****************************************************\n\n";
-            String name = coffee.getName() + " (" + coffee.getId() + ")\n";
-            String description = coffee.getDescription() + "\n";
-
-            // Creating a string builder for our milk options as some coffees have more than one, so displaying them
-            // correctly is not as straight forward as just getting the coffees milk option
-            StringBuilder milkList = new StringBuilder();
-            // For every milk option in a given coffee, add that milk to the string builder
-            for (String milk : coffee.getMilk()) {
-                // If it's not the last element in the list then append it with trailing characters for display
-                if (!milk.equals(coffee.getMilk().getLast())) {milkList.append(milk).append(", ");}
-                else {
-                    // otherwise only append the milk
-                    milkList.append(milk);
-                }
-            }
-            // String for milk option with all milk appended in correct formatting
-            String milk = "Ingredients:\nMilk: " + milkList + "\n";
-
-            // Strings for shots and sugar formatted correctly
-            String shots = "Number of shots: " + coffee.getShots() + "\n";
-            String sugar = "Sugar: " + coffee.getSugar() + "\n";
-
-            // This is the same as the above milk option. Since extras is a list due to coffees having multiple extras
-            // we have to treat it a little different using a stringbuilder and for each loop to control the display
-            StringBuilder extrasList = new StringBuilder();
-            for (String extra : coffee.getExtras()) {
-                // If it's not the last element in the list then append it with trailing characters for display
-                if (!extra.equals(coffee.getExtras().getLast())) {extrasList.append(extra).append(", ");}
-                else {
-                    // otherwise only append the extra
-                    extrasList.append(extra);
-                }
-            }
-            // Finally adding the list of extras as a correctly formatted string
-            String extras = "Extras: " + extrasList + "\n";
-            String price = "Price: $" + String.format("%,.2f",coffee.getPrice()) + "\n";
-
-            // Append all the strings in an orderly manner
-            displayMessage.append(divider).append(name).append(description).append(milk)
-                    .append(shots).append(sugar).append(extras).append(price);
+            displayMessage.append(coffee.coffeeDescription());
         }
-        // Present the user with all of the coffees that match their desired coffee and ask them to select which one they would like
-        String choice = (String) JOptionPane.showInputDialog(null, displayMessage + "Which coffee would you like:", appName, JOptionPane.QUESTION_MESSAGE,
-                icon, coffeeMatches.keySet().toArray(),"");
-        if (choice == null) {System.exit(0);}
-        // Take the users choice and query the map to add the id to the name for later use when writing to file
-        // This saves us from having to pass a map into a future function
-        return coffeeMatches.get(choice).getName() + " ("+ coffeeMatches.get(choice).getId() + ")";
+            // Present the user with all the coffees that match their desired coffee and ask them to select which one they would like
+            String choice = (String) JOptionPane.showInputDialog(null, displayMessage + "Which coffee would you like:", appName, JOptionPane.QUESTION_MESSAGE,
+                    icon, coffeeMatches.keySet().toArray(), "");
+            if (choice == null) {
+                JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
+                System.exit(0);
+            }
+            // Take the users choice and query the map to add the id to the name for later use when writing to file
+            // This saves us from having to pass a map into a future function
+            return coffeeMatches.get(choice).getName() + " (" + coffeeMatches.get(choice).getId() + ")";
+
     }
 
     /**
@@ -366,7 +341,10 @@ public class MenuSearcher {
         String name;
         do {
             name = JOptionPane.showInputDialog("Please enter your full name (John Doe)");
-            if (name == null) {System.exit(0);}
+            if (name == null) {
+                JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
+                System.exit(0);
+            }
         }
         // send the user input to the isValidName function to check if it is correctly formatted
         while (!isValidNames(name));
@@ -375,7 +353,10 @@ public class MenuSearcher {
         String number;
         do {
             number = JOptionPane.showInputDialog("Please enter your phone number (04xxxxxxxx)");
-            if (number == null) {System.exit(0);}
+            if (number == null) {
+                JOptionPane.showMessageDialog(null, "Sorry we couldn't help you today");
+                System.exit(0);
+            }
         }
         // Send the users input to the isValidPhoneNumber function to check if it is correctly formatted
         while (!isValidPhoneNumber(number));
